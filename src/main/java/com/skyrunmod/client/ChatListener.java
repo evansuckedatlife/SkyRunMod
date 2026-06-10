@@ -1,8 +1,10 @@
 package com.skyrunmod.client;
 
+import com.skyrunmod.core.CommissionParser;
 import com.skyrunmod.util.TextUtil;
 
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 /**
@@ -33,9 +35,17 @@ public final class ChatListener {
         }
         try {
             state.engine().onChatMessage(clean, state.now());
+            // Commission completion broadcast is the precise, instant signal — prefer it over the
+            // tab-list DONE poll. completeByName is a no-op if the tab already completed it.
+            CommissionParser.parseCompletionName(clean).ifPresent(name ->
+                    state.commissionTracker().completeByName(name, localPlayerName(), state.now()));
         } catch (RuntimeException e) {
             // Never let a parsing edge case break the vanilla chat pipeline.
             SkyRunModClient.LOGGER.warn("SkyRunMod chat parse error for line '{}'", clean, e);
         }
+    }
+
+    private static String localPlayerName() {
+        return MinecraftClient.getInstance().getSession().getUsername();
     }
 }

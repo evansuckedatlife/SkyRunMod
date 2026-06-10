@@ -3,15 +3,23 @@ package com.skyrunmod.client;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.skyrunmod.core.CommissionParser;
+import com.skyrunmod.util.TextUtil;
 import com.skyrunmod.util.TimeFormat;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -36,7 +44,8 @@ public final class SkyRunCommand {
                                         .executes(SkyRunCommand::pb)))
                         .then(literal("sob")
                                 .then(argument("prefix", StringArgumentType.greedyString())
-                                        .executes(SkyRunCommand::sumOfBest)))));
+                                        .executes(SkyRunCommand::sumOfBest)))
+                        .then(literal("tab").executes(SkyRunCommand::dumpTab))));
     }
 
     private static int help(FabricClientCommandSource source) {
@@ -46,6 +55,59 @@ public final class SkyRunCommand {
         source.sendFeedback(line("/skyrun toggle", "show/hide the overlay"));
         source.sendFeedback(line("/skyrun pb <key>", "look up a personal best"));
         source.sendFeedback(line("/skyrun sob <prefix>", "sum of best for keys under a prefix"));
+        source.sendFeedback(line("/skyrun tab", "debug: dump commission lines from the tab list"));
+        return 1;
+    }
+
+    /**
+     * Diagnostic: prints the commission-relevant tab lines and how the parser interprets them. Run
+     * this in the Dwarven Mines / Crystal Hollows if commissions aren't tracking, so the exact
+     * Hypixel wording can be matched.
+     */
+    private static int dumpTab(CommandContext<FabricClientCommandSource> ctx) {
+        FabricClientCommandSource source = ctx.getSource();
+        ClientPlayNetworkHandler handler = MinecraftClient.getInstance().getNetworkHandler();
+        if (handler == null) {
+            source.sendFeedback(Text.literal("Not connected to a server.").formatted(Formatting.RED));
+            return 0;
+        }
+
+        List<String> lines = new ArrayList<>();
+        for (PlayerListEntry entry : handler.getListedPlayerListEntries()) {
+            Text displayName = entry.getDisplayName();
+            if (displayName == null) {
+                continue;
+            }
+            String clean = TextUtil.clean(displayName.getString());
+            if (!clean.isEmpty()) {
+                lines.add(clean);
+            }
+        }
+
+        boolean header = CommissionParser.hasHeader(lines);
+        Map<String, Double> parsed = CommissionParser.parse(lines);
+        source.sendFeedback(accent("Commission header detected: " + (header ? "yes" : "no")));
+
+        if (parsed.isEmpty()) {
+            source.sendFeedback(Text.literal("Parsed commissions: none").formatted(Formatting.GRAY));
+        } else {
+            source.sendFeedback(accent("Parsed commissions:"));
+            parsed.forEach((name, frac) ->
+                    source.sendFeedback(line("  " + name, String.format("%.1f%%", frac * 100.0d))));
+        }
+
+        // Show candidate raw lines so a mismatched format is obvious.
+        source.sendFeedback(accent("Tab lines containing ':' / '%' / 'DONE' / 'commission':"));
+        int shown = 0;
+        for (String l : lines) {
+            String lower = l.toLowerCase();
+            if (lower.contains("commission") || l.contains("%") || l.contains(":") || lower.contains("done")) {
+                source.sendFeedback(Text.literal("  | " + l).formatted(Formatting.DARK_GRAY));
+                if (++shown >= 30) {
+                    break;
+                }
+            }
+        }
         return 1;
     }
 

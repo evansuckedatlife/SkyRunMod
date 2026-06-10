@@ -22,6 +22,7 @@ public final class SkyRunModClient implements ClientModInitializer {
         SkyRunState.bootstrap();
 
         ChatListener.register();
+        CommissionTabReader.register();
         SplitOverlay.register();
         SkyRunKeybinds.register();
         SkyRunCommand.register();

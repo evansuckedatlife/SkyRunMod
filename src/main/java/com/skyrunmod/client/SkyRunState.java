@@ -3,6 +3,7 @@ package com.skyrunmod.client;
 import com.skyrunmod.config.PersonalBestStore;
 import com.skyrunmod.config.SkyRunConfig;
 import com.skyrunmod.config.SkyRunPaths;
+import com.skyrunmod.core.CommissionTracker;
 import com.skyrunmod.core.SkyRunAnalyticsEngine;
 import com.skyrunmod.util.MonotonicClock;
 
@@ -17,11 +18,13 @@ public final class SkyRunState {
     private final SkyRunAnalyticsEngine engine;
     private final SkyRunConfig config;
     private final PersonalBestStore personalBestStore;
+    private final CommissionTracker commissionTracker;
 
     private SkyRunState(SkyRunAnalyticsEngine engine, SkyRunConfig config, PersonalBestStore store) {
         this.engine = engine;
         this.config = config;
         this.personalBestStore = store;
+        this.commissionTracker = new CommissionTracker(engine);
     }
 
     /** Loads settings + saved PBs from disk and installs the singleton. Idempotent. */
@@ -46,6 +49,10 @@ public final class SkyRunState {
 
     public SkyRunConfig config() {
         return config;
+    }
+
+    public CommissionTracker commissionTracker() {
+        return commissionTracker;
     }
 
     /** Monotonic millisecond timestamp for feeding the engine. */
