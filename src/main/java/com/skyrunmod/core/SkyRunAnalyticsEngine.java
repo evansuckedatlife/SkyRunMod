@@ -15,14 +15,15 @@ import java.util.regex.Pattern;
  * Core split and analytics model for SkyRunMod.
  */
 public final class SkyRunAnalyticsEngine {
+    private static final String USERNAME_REGEX = "[A-Za-z0-9_]{1,16}";
     private static final Pattern CRYSTAL_PICKUP_PATTERN =
-            Pattern.compile("^([A-Za-z0-9_]{1,16}) picked up an energy crystal!$");
+            Pattern.compile("^(" + USERNAME_REGEX + ") picked up an energy crystal!$");
     private static final Pattern TERMINAL_PATTERN =
-            Pattern.compile("^([A-Za-z0-9_]{1,16}) completed a terminal(?: \\((\\d+)/(\\d+)\\))?!$");
+            Pattern.compile("^(" + USERNAME_REGEX + ") completed a terminal(?: \\((\\d+)/(\\d+)\\))?!$");
     private static final Pattern DRAGON_KILL_PATTERN =
-            Pattern.compile("^([A-Za-z0-9_]{1,16}) killed (\\w+) dragon!$");
+            Pattern.compile("^(" + USERNAME_REGEX + ") killed (\\w+) dragon!$");
     private static final Pattern RELIC_PATTERN =
-            Pattern.compile("^([A-Za-z0-9_]{1,16}) picked up a relic!$");
+            Pattern.compile("^(" + USERNAME_REGEX + ") picked up a relic!$");
 
     private final Map<String, Long> activeTimers = new HashMap<>();
     private final Map<String, Long> personalBests = new HashMap<>();
