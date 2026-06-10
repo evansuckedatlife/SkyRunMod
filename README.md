@@ -25,13 +25,42 @@ recency-weighted average.
 - **Exponential Moving Average (EMA)** per room/route — an "average with recency bias" so recent
   improvements outweigh older, slower runs.
 
+**Slayers.** Per type/tier splits: quest start → boss spawn (the grind), boss spawn → slain (the
+fight), and quest → slain (total). Driven by the sidebar (type/tier/boss-up) + the quest-complete
+chat.
+
+**Dungeon runs.** Per-floor cumulative splits: start → blood door → boss entry → clear (F1–F7,
+M1–M7). Floor read from the sidebar. *(Live 270/300 score is a planned follow-up — it needs the full
+Hypixel score formula.)*
+
+**Kuudra.** Whole-run timing per tier (boss bar appears → `KUUDRA DOWN`).
+
+**Diana / Mythological Ritual.** Burrow-to-burrow chain pace and time-to-inquisitor.
+
+**Mining runs.** Crystal Hollows nucleus (first crystal → all 5, per-crystal cumulative) and
+Mineshaft-discovery cadence.
+
+**Fishing.** Sea-creature spawn cadence (gap PB/EMA) and catch count.
+
+**Session rates.** Generic per-hour panel (mineshafts, sea creatures, slayer bosses, dungeon runs,
+burrows, …) with a session clock; reset with `/skyrun rates reset`.
+
 **Macro-economy & global metrics.**
-- Commission PB splits (Dwarven Mines / Crystal Hollows).
+- Commission PB splits (Dwarven Mines / Crystal Hollows) — tablist progress + completion chat.
 - Transition timers (e.g. `/skyblock` load latency, dungeon ready-up).
 - **Sum of best** across any key prefix (theoretical-best run).
 
+**Settings GUI.** A ModMenu + cloth-config screen (Overlay / Activities / Data) backed by
+`SkyRunConfig`, including per-activity enable toggles.
+
 **Persistence.** Personal bests and EMAs are saved to `config/skyrunmod/personal_bests.json` and
 restored on launch; overlay settings live in `config/skyrunmod/settings.json`.
+
+### Input plumbing
+Detectors draw on chat, the **tablist**, the **scoreboard sidebar** (area + activity state), the
+**boss bar** (via a tiny accessor mixin), and the **action bar**. Diagnostics
+`/skyrun scoreboard|bossbar|actionbar|area|tab` dump exactly what the parsers see, so any Hypixel
+wording that drifts can be matched quickly.
 
 ## Controls
 

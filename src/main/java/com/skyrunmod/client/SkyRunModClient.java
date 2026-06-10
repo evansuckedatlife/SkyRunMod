@@ -22,7 +22,14 @@ public final class SkyRunModClient implements ClientModInitializer {
         SkyRunState.bootstrap();
 
         ChatListener.register();
+        ActionBarListener.register();
+        LocationProvider.register();
         CommissionTabReader.register();
+        SlayerDetector.register();
+        DungeonDetector.register();
+        KuudraDetector.register();
+        DianaDetector.register();
+        MiningFishingDetector.register();
         SplitOverlay.register();
         SkyRunKeybinds.register();
         SkyRunCommand.register();

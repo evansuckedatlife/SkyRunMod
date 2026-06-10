@@ -12,6 +12,8 @@ base {
 repositories {
     mavenCentral()
     maven("https://maven.fabricmc.net/")
+    maven("https://maven.shedaniel.me/")
+    maven("https://maven.terraformersmc.com/")
 }
 
 dependencies {
@@ -24,6 +26,13 @@ dependencies {
     mappings("net.fabricmc:yarn:$yarnMappings:v2")
     modImplementation("net.fabricmc:fabric-loader:$loaderVersion")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
+
+    // Settings GUI: cloth-config builds the screen, ModMenu provides the entry point. Both versions
+    // match what the target profile already ships. The mod runs fine without them (GUI just absent).
+    modImplementation("me.shedaniel.cloth:cloth-config-fabric:21.11.153") {
+        exclude(group = "net.fabricmc.fabric-api")
+    }
+    modImplementation("com.terraformersmc:modmenu:17.0.0")
 
     // JUnit 5 for the core analytics engine tests (pure JVM, no Minecraft on the test classpath).
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")

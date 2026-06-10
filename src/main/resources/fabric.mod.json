@@ -16,12 +16,22 @@
   "entrypoints": {
     "client": [
       "com.skyrunmod.client.SkyRunModClient"
+    ],
+    "modmenu": [
+      "com.skyrunmod.client.gui.ModMenuIntegration"
     ]
   },
+  "mixins": [
+    "skyrunmod.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "minecraft": "~${minecraft_version}",
     "java": ">=21",
     "fabric-api": "*"
+  },
+  "recommends": {
+    "cloth-config": "*",
+    "modmenu": "*"
   }
 }

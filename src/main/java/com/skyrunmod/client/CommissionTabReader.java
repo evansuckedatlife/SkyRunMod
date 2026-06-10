@@ -37,7 +37,7 @@ public final class CommissionTabReader {
             return;
         }
         SkyRunState state = SkyRunState.get();
-        if (state == null || client.player == null) {
+        if (state == null || client.player == null || !state.config().enableCommissions) {
             return;
         }
         ClientPlayNetworkHandler handler = client.getNetworkHandler();

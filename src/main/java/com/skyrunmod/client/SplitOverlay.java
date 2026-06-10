@@ -61,6 +61,9 @@ public final class SplitOverlay implements HudElement {
         engine.overlayModel().pruneStale(state.now(), config.staleSectionTtlMillis);
 
         List<Line> lines = buildLines(client.textRenderer, engine, config);
+        if (config.showRates) {
+            appendRateLines(lines, state, state.now());
+        }
         if (lines.isEmpty()) {
             return;
         }
@@ -115,6 +118,23 @@ public final class SplitOverlay implements HudElement {
             lines.add(splitLine(recent.get(i), engine, config));
         }
         return lines;
+    }
+
+    private static void appendRateLines(List<Line> lines, SkyRunState state, long now) {
+        com.skyrunmod.core.SessionRates rates = state.sessionRates();
+        if (rates.isEmpty()) {
+            return;
+        }
+        Line header = new Line();
+        header.add("Rates", COLOR_ACCENT, 0);
+        lines.add(header);
+        for (Map.Entry<String, Long> entry : rates.snapshot().entrySet()) {
+            Line line = new Line();
+            line.add(entry.getKey().replace('_', ' '), COLOR_LABEL, COLUMN_GAP);
+            line.add(String.valueOf(entry.getValue()), COLOR_TIME, COLUMN_GAP);
+            line.add(String.format("%.1f/hr", rates.perHour(entry.getKey(), now)), COLOR_EMA, 0);
+            lines.add(line);
+        }
     }
 
     private static Line splitLine(SplitRecord record, SkyRunAnalyticsEngine engine, SkyRunConfig config) {
@@ -177,10 +197,16 @@ public final class SplitOverlay implements HudElement {
             case DUNGEON_STORM -> "F7 · Storm";
             case DUNGEON_GOLDOR -> "F7 · Goldor";
             case DUNGEON_M7_DRAGON -> "M7 · Dragons";
+            case DUNGEON_FLOOR -> "Dungeon";
             case ROOM_CLEAR -> "Room Clear";
             case ROUTE_EXECUTION -> "Route";
             case COMMISSION -> "Commission";
             case TRANSITION -> "Transition";
+            case SLAYER -> "Slayer";
+            case KUUDRA -> "Kuudra";
+            case DIANA -> "Diana";
+            case MINING_RUN -> "Mining";
+            case FISHING -> "Fishing";
         };
     }
 

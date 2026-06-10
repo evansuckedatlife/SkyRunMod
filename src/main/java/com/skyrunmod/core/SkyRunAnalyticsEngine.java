@@ -361,10 +361,16 @@ public final class SkyRunAnalyticsEngine {
         DUNGEON_STORM,
         DUNGEON_GOLDOR,
         DUNGEON_M7_DRAGON,
+        DUNGEON_FLOOR,
         ROOM_CLEAR,
         ROUTE_EXECUTION,
         COMMISSION,
-        TRANSITION
+        TRANSITION,
+        SLAYER,
+        KUUDRA,
+        DIANA,
+        MINING_RUN,
+        FISHING
     }
 
     /**

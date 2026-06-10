@@ -11,6 +11,8 @@ import java.util.OptionalLong;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.skyrunmod.client.hud.BossBarReader;
+import com.skyrunmod.client.hud.ScoreboardReader;
 import com.skyrunmod.core.CommissionParser;
 import com.skyrunmod.util.TextUtil;
 import com.skyrunmod.util.TimeFormat;
@@ -45,7 +47,14 @@ public final class SkyRunCommand {
                         .then(literal("sob")
                                 .then(argument("prefix", StringArgumentType.greedyString())
                                         .executes(SkyRunCommand::sumOfBest)))
-                        .then(literal("tab").executes(SkyRunCommand::dumpTab))));
+                        .then(literal("rates")
+                                .executes(SkyRunCommand::dumpRates)
+                                .then(literal("reset").executes(SkyRunCommand::resetRates)))
+                        .then(literal("tab").executes(SkyRunCommand::dumpTab))
+                        .then(literal("scoreboard").executes(SkyRunCommand::dumpScoreboard))
+                        .then(literal("bossbar").executes(SkyRunCommand::dumpBossBar))
+                        .then(literal("actionbar").executes(SkyRunCommand::dumpActionBar))
+                        .then(literal("area").executes(SkyRunCommand::dumpArea))));
     }
 
     private static int help(FabricClientCommandSource source) {
@@ -56,6 +65,80 @@ public final class SkyRunCommand {
         source.sendFeedback(line("/skyrun pb <key>", "look up a personal best"));
         source.sendFeedback(line("/skyrun sob <prefix>", "sum of best for keys under a prefix"));
         source.sendFeedback(line("/skyrun tab", "debug: dump commission lines from the tab list"));
+        source.sendFeedback(line("/skyrun scoreboard", "debug: dump sidebar lines"));
+        source.sendFeedback(line("/skyrun bossbar", "debug: dump active boss bars"));
+        source.sendFeedback(line("/skyrun actionbar", "debug: show the latest action bar text"));
+        source.sendFeedback(line("/skyrun area", "debug: show the detected area"));
+        return 1;
+    }
+
+    private static int dumpRates(CommandContext<FabricClientCommandSource> ctx) {
+        SkyRunState state = SkyRunState.get();
+        if (state == null) {
+            return 0;
+        }
+        FabricClientCommandSource source = ctx.getSource();
+        com.skyrunmod.core.SessionRates rates = state.sessionRates();
+        if (rates.isEmpty()) {
+            source.sendFeedback(Text.literal("No session activity recorded yet.").formatted(Formatting.GRAY));
+            return 1;
+        }
+        long now = state.now();
+        source.sendFeedback(accent("Session rates (" + TimeFormat.duration(rates.elapsedMillis(now)) + "):"));
+        rates.snapshot().forEach((metric, count) -> source.sendFeedback(
+                line("  " + metric.replace('_', ' '),
+                        count + "  (" + String.format("%.1f/hr", rates.perHour(metric, now)) + ")")));
+        return 1;
+    }
+
+    private static int resetRates(CommandContext<FabricClientCommandSource> ctx) {
+        SkyRunState state = SkyRunState.get();
+        if (state == null) {
+            return 0;
+        }
+        state.sessionRates().reset();
+        ctx.getSource().sendFeedback(accent("Session rates reset."));
+        return 1;
+    }
+
+    private static int dumpScoreboard(CommandContext<FabricClientCommandSource> ctx) {
+        FabricClientCommandSource source = ctx.getSource();
+        String title = ScoreboardReader.title();
+        List<String> lines = ScoreboardReader.sidebarLines();
+        source.sendFeedback(accent("Sidebar title: " + (title.isEmpty() ? "<none>" : title)));
+        if (lines.isEmpty()) {
+            source.sendFeedback(Text.literal("No sidebar shown.").formatted(Formatting.GRAY));
+            return 1;
+        }
+        for (String l : lines) {
+            source.sendFeedback(Text.literal("  | " + l).formatted(Formatting.DARK_GRAY));
+        }
+        return 1;
+    }
+
+    private static int dumpBossBar(CommandContext<FabricClientCommandSource> ctx) {
+        FabricClientCommandSource source = ctx.getSource();
+        List<BossBarReader.BossBarInfo> bars = BossBarReader.activeBossBars();
+        if (bars.isEmpty()) {
+            source.sendFeedback(Text.literal("No active boss bars.").formatted(Formatting.GRAY));
+            return 1;
+        }
+        source.sendFeedback(accent("Active boss bars:"));
+        for (BossBarReader.BossBarInfo bar : bars) {
+            source.sendFeedback(line("  " + bar.name(), String.format("%.1f%%", bar.percent() * 100.0f)));
+        }
+        return 1;
+    }
+
+    private static int dumpActionBar(CommandContext<FabricClientCommandSource> ctx) {
+        String last = ActionBarListener.last();
+        ctx.getSource().sendFeedback(line("Action bar", last.isEmpty() ? "<none yet>" : last));
+        return 1;
+    }
+
+    private static int dumpArea(CommandContext<FabricClientCommandSource> ctx) {
+        String area = LocationProvider.currentArea();
+        ctx.getSource().sendFeedback(line("Area", area.isEmpty() ? "<unknown>" : area));
         return 1;
     }
 

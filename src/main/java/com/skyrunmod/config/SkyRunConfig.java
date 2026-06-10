@@ -37,6 +37,17 @@ public final class SkyRunConfig {
     public long staleSectionTtlMillis = 15_000L;
     /** Persist personal bests/EMAs to disk on shutdown and run reset. */
     public boolean persistPersonalBests = true;
+    /** Show the session-rates panel (per-hour counters). */
+    public boolean showRates = true;
+
+    // Per-activity detection toggles (surfaced in the settings GUI).
+    public boolean enableCommissions = true;
+    public boolean enableSlayer = true;
+    public boolean enableDungeon = true;
+    public boolean enableKuudra = true;
+    public boolean enableDiana = true;
+    public boolean enableMining = true;
+    public boolean enableFishing = true;
 
     public static SkyRunConfig load(Path file) {
         if (Files.isRegularFile(file)) {
