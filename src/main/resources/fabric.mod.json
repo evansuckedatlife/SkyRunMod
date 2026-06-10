@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "skyrunmod",
+  "version": "${version}",
+  "name": "SkyRunMod",
+  "description": "Speedrun splits, personal bests and analytics for Hypixel Skyblock: dungeon phase timings, room/secret clears with recency-weighted averages, commission PBs and an on-screen LiveSplit-style overlay.",
+  "authors": [
+    "evansuckedatlife"
+  ],
+  "contact": {
+    "homepage": "https://github.com/evansuckedatlife/SkyRunMod",
+    "sources": "https://github.com/evansuckedatlife/SkyRunMod"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.skyrunmod.client.SkyRunModClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "~${minecraft_version}",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
