@@ -5,6 +5,8 @@ public final class SkyRunAnalyticsEngineTest {
         testCrystalAndTerminalParsing();
         testRoomPbAndEma();
         testOverlayClearsOnActivityChange();
+        testGoldorTerminalRequiresPhaseStart();
+        testClockSkewThrows();
         System.out.println("SkyRunAnalyticsEngineTest passed");
     }
 
@@ -48,5 +50,22 @@ public final class SkyRunAnalyticsEngineTest {
         engine.transitionStart("skyblock_load", 200L);
         assert engine.overlayModel().sections().containsKey("transition");
         assert !engine.overlayModel().sections().containsKey("storm");
+    }
+
+    private static void testGoldorTerminalRequiresPhaseStart() {
+        SkyRunAnalyticsEngine engine = new SkyRunAnalyticsEngine();
+        assert engine.recordGoldorTerminal("Bob", "1/7", 1000L).isEmpty();
+    }
+
+    private static void testClockSkewThrows() {
+        SkyRunAnalyticsEngine engine = new SkyRunAnalyticsEngine();
+        engine.startSplit("transition.skyblock_load", 1000L);
+        boolean thrown = false;
+        try {
+            engine.completeSplit("transition.skyblock_load", "Alice", 900L);
+        } catch (IllegalArgumentException ignored) {
+            thrown = true;
+        }
+        assert thrown;
     }
 }

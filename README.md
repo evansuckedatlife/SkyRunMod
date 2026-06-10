@@ -5,7 +5,7 @@ Skyblock Mod for Fabric 1.21.11 that provides speedrun splits and personal bests
 
 This repository now includes a minimal core analytics engine at:
 
-- `/home/runner/work/SkyRunMod/SkyRunMod/evansuckedatlife/SkyRunMod/src/main/java/com/skyrunmod/core/SkyRunAnalyticsEngine.java`
+- `src/main/java/com/skyrunmod/core/SkyRunAnalyticsEngine.java`
 
 Implemented feature coverage:
 

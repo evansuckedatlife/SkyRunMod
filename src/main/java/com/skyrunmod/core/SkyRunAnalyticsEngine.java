@@ -105,8 +105,11 @@ public final class SkyRunAnalyticsEngine {
 
     public Optional<SplitRecord> completeSplit(String key, String actor, long nowMillis) {
         Long start = activeTimers.remove(key);
-        if (start == null || nowMillis < start) {
+        if (start == null) {
             return Optional.empty();
+        }
+        if (nowMillis < start) {
+            throw new IllegalArgumentException("nowMillis cannot be earlier than split start for " + key);
         }
         long elapsed = nowMillis - start;
         boolean isPb = updatePersonalBest(key, elapsed);
@@ -141,8 +144,11 @@ public final class SkyRunAnalyticsEngine {
     }
 
     public Optional<SplitRecord> recordGoldorTerminal(String actor, String terminalIndex, long nowMillis) {
+        if (!activeTimers.containsKey("dungeon.goldor.phase")) {
+            return Optional.empty();
+        }
         String key = "dungeon.goldor.terminal." + terminalIndex;
-        startSplit(key, activeTimers.getOrDefault("dungeon.goldor.phase", nowMillis));
+        startSplit(key, activeTimers.get("dungeon.goldor.phase"));
         Optional<SplitRecord> split = completeSplit(key, actor, nowMillis);
         split.ifPresent(s -> overlayModel.setSection("goldor", "Terminal " + terminalIndex + " by " + actor));
         return split;
